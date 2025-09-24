@@ -1,0 +1,39 @@
+name: Build NKF on Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          repository: nurse/nkf
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >
+            make
+            gcc
+
+      - name: Build nkf
+        shell: msys2 {0}
+        run: |
+          make
+
+      - name: Find built exe
+        shell: bash
+        run: |
+          # tìm file nkf.exe rồi copy ra root để dễ upload
+          find . -name "nkf.exe" -exec cp {} ./nkf.exe \;
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nkf-windows
+          path: nkf.exe
